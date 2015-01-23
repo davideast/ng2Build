@@ -1,0 +1,219 @@
+System.register("benchmarks/change_detection/change_detection_benchmark", ["facade/collection", "reflection/reflection", "facade/lang", "e2e_test_lib/benchmark_util", "change_detection/change_detection"], function($__export) {
+  "use strict";
+  var __moduleName = "benchmarks/change_detection/change_detection_benchmark";
+  var ListWrapper,
+      MapWrapper,
+      reflector,
+      isPresent,
+      getIntParameter,
+      bindAction,
+      Lexer,
+      Parser,
+      ChangeDetector,
+      ProtoRecordRange,
+      ChangeDispatcher,
+      Obj,
+      Row,
+      DummyDispatcher;
+  function setUpReflector() {
+    reflector.registerGetters({
+      'field0': function(obj) {
+        return obj.field0;
+      },
+      'field1': function(obj) {
+        return obj.field1;
+      },
+      'field2': function(obj) {
+        return obj.field2;
+      },
+      'field3': function(obj) {
+        return obj.field3;
+      },
+      'field4': function(obj) {
+        return obj.field4;
+      },
+      'field5': function(obj) {
+        return obj.field5;
+      },
+      'field6': function(obj) {
+        return obj.field6;
+      },
+      'field7': function(obj) {
+        return obj.field7;
+      },
+      'field8': function(obj) {
+        return obj.field8;
+      },
+      'field9': function(obj) {
+        return obj.field9;
+      }
+    });
+    reflector.registerSetters({
+      'field0': function(obj, v) {
+        return obj.field0 = v;
+      },
+      'field1': function(obj, v) {
+        return obj.field1 = v;
+      },
+      'field2': function(obj, v) {
+        return obj.field2 = v;
+      },
+      'field3': function(obj, v) {
+        return obj.field3 = v;
+      },
+      'field4': function(obj, v) {
+        return obj.field4 = v;
+      },
+      'field5': function(obj, v) {
+        return obj.field5 = v;
+      },
+      'field6': function(obj, v) {
+        return obj.field6 = v;
+      },
+      'field7': function(obj, v) {
+        return obj.field7 = v;
+      },
+      'field8': function(obj, v) {
+        return obj.field8 = v;
+      },
+      'field9': function(obj, v) {
+        return obj.field9 = v;
+      }
+    });
+  }
+  function setUpBaseline(iterations) {
+    function createRow(i) {
+      var obj = new Obj();
+      var index = i % 10;
+      obj.setField(index, i);
+      var r = new Row();
+      r.obj = obj;
+      r.previousValue = i;
+      r.getter = reflector.getter(("field" + index));
+      return r;
+    }
+    var head = createRow(0);
+    var current = head;
+    for (var i = 1; i < iterations; i++) {
+      var newRow = createRow(i);
+      current.next = newRow;
+      current = newRow;
+    }
+    return head;
+  }
+  function setUpChangeDetection(iterations) {
+    var dispatcher = new DummyDispatcher();
+    var parser = new Parser(new Lexer());
+    var parentProto = new ProtoRecordRange();
+    var parentRange = parentProto.instantiate(dispatcher, MapWrapper.create());
+    var astWithSource = [parser.parseBinding('field0', null), parser.parseBinding('field1', null), parser.parseBinding('field2', null), parser.parseBinding('field3', null), parser.parseBinding('field4', null), parser.parseBinding('field5', null), parser.parseBinding('field6', null), parser.parseBinding('field7', null), parser.parseBinding('field8', null), parser.parseBinding('field9', null)];
+    function proto(i) {
+      var prr = new ProtoRecordRange();
+      prr.addRecordsFromAST(astWithSource[i % 10].ast, "memo", i, false);
+      return prr;
+    }
+    var prr = [proto(0), proto(1), proto(2), proto(3), proto(4), proto(5), proto(6), proto(7), proto(8), proto(9)];
+    for (var i = 0; i < iterations; ++i) {
+      var obj = new Obj();
+      var index = i % 10;
+      obj.setField(index, i);
+      var rr = prr[index].instantiate(dispatcher, null);
+      rr.setContext(obj);
+      parentRange.addRange(rr);
+    }
+    return new ChangeDetector(parentRange);
+  }
+  function main() {
+    var iterations = getIntParameter('iterations');
+    setUpReflector();
+    var baselineHead = setUpBaseline(iterations);
+    var ng2ChangeDetector = setUpChangeDetection(iterations);
+    function baselineDetectChanges() {
+      var current = baselineHead;
+      while (isPresent(current)) {
+        if (current.getter(current.obj) !== current.previousValue) {
+          throw "should not happen";
+        }
+        current = current.next;
+      }
+    }
+    function ng2DetectChanges() {
+      ng2ChangeDetector.detectChanges();
+    }
+    bindAction('#ng2DetectChanges', ng2DetectChanges);
+    bindAction('#baselineDetectChanges', baselineDetectChanges);
+  }
+  $__export("main", main);
+  return {
+    setters: [function(m) {
+      ListWrapper = m.ListWrapper;
+      MapWrapper = m.MapWrapper;
+    }, function(m) {
+      reflector = m.reflector;
+    }, function(m) {
+      isPresent = m.isPresent;
+    }, function(m) {
+      getIntParameter = m.getIntParameter;
+      bindAction = m.bindAction;
+    }, function(m) {
+      Lexer = m.Lexer;
+      Parser = m.Parser;
+      ChangeDetector = m.ChangeDetector;
+      ProtoRecordRange = m.ProtoRecordRange;
+      ChangeDispatcher = m.ChangeDispatcher;
+    }],
+    execute: function() {
+      Obj = (function() {
+        var Obj = function Obj() {};
+        return ($traceurRuntime.createClass)(Obj, {setField: function(index, value) {
+            switch (index) {
+              case 0:
+                this.field0 = value;
+                break;
+              case 1:
+                this.field1 = value;
+                break;
+              case 2:
+                this.field2 = value;
+                break;
+              case 3:
+                this.field3 = value;
+                break;
+              case 4:
+                this.field4 = value;
+                break;
+              case 5:
+                this.field5 = value;
+                break;
+              case 6:
+                this.field6 = value;
+                break;
+              case 7:
+                this.field7 = value;
+                break;
+              case 8:
+                this.field8 = value;
+                break;
+              case 9:
+                this.field9 = value;
+                break;
+            }
+          }}, {});
+      }());
+      Row = (function() {
+        var Row = function Row() {};
+        return ($traceurRuntime.createClass)(Row, {}, {});
+      }());
+      DummyDispatcher = (function($__super) {
+        var DummyDispatcher = function DummyDispatcher() {
+          $traceurRuntime.superConstructor(DummyDispatcher).apply(this, arguments);
+        };
+        return ($traceurRuntime.createClass)(DummyDispatcher, {onRecordChange: function(record, context) {}}, {}, $__super);
+      }(ChangeDispatcher));
+    }
+  };
+});
+
+//# sourceMappingURL=/Users/deast/Angular/angular/modules/benchmarks/src/change_detection/change_detection_benchmark.map
+
+//# sourceMappingURL=./change_detection_benchmark.map
