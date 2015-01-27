@@ -4,69 +4,19 @@ Angular 2 is not packaged or ready for production.
 
 ### Installation
 
-1. Clone this repo
-2. Wrap your code in a System.import
+1. Clone angular/angular somewhere on your disk.
+2. Follow the instructions for Angular 2 and `gulp build` there.
+3. `ln -s ~/angular/dist/js/dev ng` in the root of this repo.
+4. Write your AtScript code in hello.js.
 
-```javascript
-System.import('core/core')
-.then((ng) => {
+### Static deps
+(already included in the deps folder)
+1. The latest version of traceur.js (modified to support atscript out of the box).
+2. The latest version of system.js
+3. The latest version of es6-module-loader.js
+4. The latest version of zone.js (and long-stacktrace-zone.js)
 
-  // Do your Angular 2 magic here
-
-});
-```
-
-### How It's Done
-1. Run the gulp build command from the Angular 2 repo.
-2. Copy the entire `dist/js/prod` folder is copied from dist path of the Angular 2 repo.
-3. Get the latest version of traceur.js
-4. Create an `index.html` file inside of the `dist` folder.
-5. Include the following scripts in the `index.html` file
-```html
-<script src="/traceur.js"></script>
-<script src="/deps/traceur-runtime.js"></script>
-<script src="/rtts_assert/lib/rtts_assert.js"></script>
-<script src="/deps/es6-module-loader-sans-promises.src.js"></script>
-<script src="/deps/zone.js"></script>
-<script src="/deps/long-stack-trace-zone.js"></script>
-<script src="/deps/system.src.js"></script>
-<script src="/deps/extension-register.js"></script>
-<script src="/deps/runtime_paths.js"></script>
-```
-6. Bootstrap Traceur and set it to use the experimental features for AtScript. Insert this script block below the scripts above.
-```html
-<script>
-new traceur.WebPageTranscoder(document.location.href).run();
-$traceurRuntime.options.types = true;
-$traceurRuntime.options.annotations = true;
-$traceurRuntime.options.memberVariables = true;
-</script>
-```
-7. Create a script block of `type=module`.
-```html
-<script type="module">
-</script>
-```
-8. Import the Angular core with System.js.
-```html
-<script type="module">
-  System.import('core/core')
-  .then((ng) => {
-
-    // Do your Angular 2 magic here
-
-  });
-</script>
-```
-
-### Known Issues
-
-#### Traceur processes the page twice
-The page is processed first without Traceur, then with Traceur. You'll see errors from this first processing. There is no fix for this yet, but to help separate these erroenous Traceur errors from your real errors set a `console.log` after your import of Angular core (`System.import('core/core')`).
-
-```javascript
-System.import('core/core')
-.then((ng) => {
-  console.log('^-- Those errors are from the first processing without Traceur. Please ignore me, I will be fixed soon.');
-});
-```
+### Hacks
+Due to bug in system.js and traceur integration, options are not picked up,
+(TODO:rado file a bug and put a link here). To support atscript, we manually
+editted the atscript flags in `traceur.js` (see `index.html` for the names of the flags.)
